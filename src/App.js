@@ -2,17 +2,29 @@ import React, { Component } from 'react';
 import TodoListTemplate from './components/TodoListTemplate';
 import Form from './components/Form';
 import TodoItemList from './components/TodoItemList';
+import axios from 'axios';
+import "../node_modules/video-react/dist/video-react.css";
+import { Player, PosterImage } from 'video-react';
 
 class App extends Component {
   id = 3
 
   state = {
     input: '',
+    host: '',
     todos: [
-      { id: 0, text: ' 리액트 소개', checked: false},
-      { id: 1, text: ' 리액트 소개', checked: true},
-      { id: 2, text: ' 리액트 소개', checked: false}
+      { id: 0, text: ' 리액트 소개', checked: false }
     ]
+  }
+
+  componentDidMount() {
+    this._getHost();
+  }
+
+  _getHost = async () => {
+    const res = await axios.get('/api/host');
+    console.log(res);
+    this.setState({ host: res.data.host })
   }
 
   handleChange = (e) => {
@@ -31,10 +43,14 @@ class App extends Component {
         checked: false
       })
     });
+    axios.post('/api/add', 'test')
+      .then(response => {
+        console.log(response)
+      });
   }
 
   handleKeyPress = (e) => {
-    if(e.Key === 'Enter') {
+    if (e.Key === 'Enter') {
       this.handleCreate();
     }
   }
@@ -60,7 +76,7 @@ class App extends Component {
   }
 
   handleRemove = (id) => {
-    const {todos } = this.state;
+    const { todos } = this.state;
     this.setState({
       todos: todos.filter(todo => todo.id !== id)
     });
@@ -79,13 +95,19 @@ class App extends Component {
     return (
       <TodoListTemplate form={(
         <Form
-          value = {input}
-          onKeyPress = {handleKeyPress}
-          onChange = {handleChange}
-          onCreate = {handleCreate}
+          value={input}
+          onKeyPress={handleKeyPress}
+          onChange={handleChange}
+          onCreate={handleCreate}
         />
       )}>
         <TodoItemList todos={todos} onToggle={handleToggle} onRemove={handleRemove} />
+        <h3>Welcome to <u> {this.state.host} </u></h3>
+        <Player
+          playsInline
+          poster="/assets/poster.png"
+          src="https://media.w3.org/2010/05/sintel/trailer_hd.mp4"
+        />
       </TodoListTemplate>
     );
   }
